@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英検準1級 Beyond Small Talk フラッシュカード</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Helvetica Neue', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+    background: #1e1e24;
+    background-image: radial-gradient(circle at 20% 10%, #2a2a35 0%, #1a1a20 70%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+  h1 {
+    color: #ff9a3c;
+    margin-bottom: 6px;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    color: #c8c8d0;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 14px;
+  }
+  .progress {
+    color: #ffd28a;
+    font-size: 18px;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .progress-bar {
+    width: 100%;
+    max-width: 600px;
+    height: 8px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff9a3c 0%, #6bcb77 100%);
+    transition: width 0.3s;
+    width: 5%;
+  }
+  .card {
+    width: 100%;
+    max-width: 600px;
+    min-height: 430px;
+    background: #fafafa;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 2px solid #ff9a3c;
+    margin-bottom: 18px;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.3s, border-color 0.3s;
+  }
+  .card.back {
+    background: #fff8ee;
+    border-color: #6bcb77;
+    justify-content: flex-start;
+    padding-top: 32px;
+  }
+  .face-front, .face-back {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .face-back { display: none; }
+  .card.back .face-front { display: none; }
+  .card.back .face-back { display: flex; }
+  .word {
+    font-size: 40px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 8px;
+    word-break: break-word;
+    text-align: center;
+    width: 100%;
+  }
+  .phonetic {
+    font-size: 20px;
+    color: #e67e22;
+    margin-bottom: 12px;
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+  }
+  .pos {
+    font-size: 13px;
+    color: #555;
+    font-style: italic;
+    background: #ececec;
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .tap-hint {
+    margin-top: 18px;
+    font-size: 13px;
+    color: #888;
+    text-align: center;
+    width: 100%;
+  }
+  .meaning {
+    font-size: 28px;
+    color: #c0392b;
+    font-weight: 700;
+    margin-bottom: 18px;
+    width: 100%;
+    text-align: center;
+  }
+  .example-label {
+    font-size: 12px;
+    color: #27ae60;
+    margin-bottom: 6px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    text-align: left;
+  }
+  .example {
+    font-size: 15px;
+    color: #2c3e50;
+    line-height: 1.6;
+    background: white;
+    padding: 14px;
+    border-radius: 10px;
+    border-left: 4px solid #27ae60;
+    margin-bottom: 10px;
+    text-align: left;
+    width: 100%;
+  }
+  .example-jp {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.5;
+    text-align: left;
+    width: 100%;
+    margin-bottom: 14px;
+    padding: 0 4px;
+  }
+  .controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 6px;
+    width: 100%;
+  }
+  .btn {
+    padding: 10px 22px;
+    border-radius: 22px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    border: 2px solid;
+    transition: background 0.2s;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .btn-orange { background: #ff7e3c; color: #fff; border-color: #d35400; }
+  .btn-orange:active { background: #d35400; }
+  .btn-green { background: #27ae60; color: #fff; border-color: #1e8449; }
+  .btn-green:active { background: #1e8449; }
+  .btn-white { background: #fff; color: #1e1e24; border-color: #fff; }
+  .btn-white:active { background: #e0e0e0; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .speed-control {
+    background: white;
+    padding: 7px 14px;
+    border-radius: 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #2c3e50;
+    font-weight: 500;
+    border: 2px solid #d35400;
+  }
+  .speed-control select {
+    border: 2px solid #ff7e3c;
+    border-radius: 15px;
+    padding: 3px 8px;
+    font-size: 13px;
+    background: white;
+    cursor: pointer;
+    font-weight: 700;
+    color: #d35400;
+    outline: none;
+    font-family: inherit;
+  }
+  .nav-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .nav-btn {
+    padding: 12px 28px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    border: 2px solid;
+    transition: background 0.2s;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .list-toggle {
+    display: block;
+    margin: 18px auto 0;
+    padding: 9px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    background: #ff7e3c;
+    color: #fff;
+    border: 2px solid #d35400;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .list-toggle:active { background: #d35400; }
+  .word-list {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 16px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+    border: 2px solid #ff9a3c;
+  }
+  .word-list.show { display: block; }
+  .list-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e8e8e8;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 14px;
+  }
+  .list-item:active { background: #fff8ee; }
+  .list-item.current { background: #fff0e0; font-weight: 700; border-left: 4px solid #ff7e3c; }
+  .list-num { color: #d35400; min-width: 28px; font-weight: 700; }
+  .list-word { flex: 1; color: #2c3e50; }
+  .list-meaning { color: #1e8449; font-size: 13px; font-weight: 500; }
+  
+  @media (max-width: 480px) {
+    .word { font-size: 32px; }
+    .meaning { font-size: 22px; }
+    .example { font-size: 14px; }
+    .nav-btn { padding: 10px 20px; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+  <h1>英検準1級 フラッシュカード</h1>
+  <div class="subtitle">2023年度第1回 大問2 Beyond Small Talk より 重要単語・熟語</div>
+  
+  <div class="progress" id="progress">1 / 29</div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+  
+  <div class="card" id="card">
+    <div class="face-front">
+      <div class="word" id="word"></div>
+      <div class="phonetic" id="phonetic"></div>
+      <div class="pos" id="pos"></div>
+      <div class="controls">
+        <button type="button" class="btn btn-orange" id="playWord">🔊 単語を再生</button>
+        <span class="speed-control">速度
+          <select id="speedSelect">
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1.0" selected>1.0x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+          </select>
+        </span>
+      </div>
+      <div class="tap-hint">👆 タップで意味を表示</div>
+    </div>
+    <div class="face-back">
+      <div class="meaning" id="meaning"></div>
+      <div class="example-label">📖 本文での使用例</div>
+      <div class="example" id="example"></div>
+      <div class="example-jp" id="exampleJp"></div>
+      <div class="controls">
+        <button type="button" class="btn btn-green" id="playExample">🔊 例文を再生</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="nav-controls">
+    <button type="button" class="nav-btn btn-white" id="prevBtn">← 前へ</button>
+    <button type="button" class="nav-btn btn-orange" id="shuffleBtn">🔀 シャッフル</button>
+    <button type="button" class="nav-btn btn-green" id="resetBtn">🔄 リセット</button>
+    <button type="button" class="nav-btn btn-white" id="nextBtn">次へ →</button>
+  </div>
+  
+  <button type="button" class="list-toggle" id="listToggle">📋 単語一覧を表示</button>
+  
+  <div class="word-list" id="wordList"></div>
+
+<script>
+(function() {
+  var original = [
+    { word: "small talk", phonetic: "/smɔːl tɔːk/", pos: "名詞句 (noun phrase)", meaning: "世間話、雑談", example: "Beyond Small Talk", exampleJp: "世間話を超えて（タイトル）" },
+    { word: "indicate", phonetic: "/ˈɪndɪkeɪt/", pos: "動詞 (verb)", meaning: "示す、示唆する", example: "Research indicates that the relationships people have can influence their well-being.", exampleJp: "研究は、人々が持つ人間関係が彼らの幸福に影響を与えうることを示している。" },
+    { word: "well-being", phonetic: "/ˌwel ˈbiːɪŋ/", pos: "名詞 (noun)", meaning: "幸福、健康", example: "The relationships people have can influence their well-being.", exampleJp: "人々が持つ人間関係は彼らの幸福に影響を与えうる。" },
+    { word: "not only A but also B", phonetic: "/nɑːt ˈoʊnli bʌt ˈɔːlsoʊ/", pos: "熟語 (phrase)", meaning: "AだけでなくBも", example: "Positive relationships not only lead to increased happiness but also have a beneficial effect on physical health.", exampleJp: "良好な人間関係は幸福を増すだけでなく、身体的健康にも有益な効果がある。" },
+    { word: "beneficial", phonetic: "/ˌbenɪˈfɪʃəl/", pos: "形容詞 (adjective)", meaning: "有益な", example: "Positive relationships have a beneficial effect on physical health.", exampleJp: "良好な人間関係は身体的健康に有益な効果がある。" },
+    { word: "so far", phonetic: "/soʊ fɑːr/", pos: "熟語 (phrase)", meaning: "これまでのところ", example: "So far, most studies have focused on relationships with people we are close to.", exampleJp: "これまでのところ、ほとんどの研究は親しい人々との関係に焦点を当ててきた。" },
+    { word: "be close to", phonetic: "/biː kloʊs tuː/", pos: "熟語 (phrase)", meaning: "〜と親しい", example: "Most studies have focused on relationships with people we are close to.", exampleJp: "ほとんどの研究は私たちが親しい人々との関係に焦点を当ててきた。" },
+    { word: "be likely to", phonetic: "/biː ˈlaɪkli tuː/", pos: "熟語 (phrase)", meaning: "〜しそうである", example: "We are most likely to talk to such people.", exampleJp: "私たちはそういった人々と最も話しそうである。" },
+    { word: "explore", phonetic: "/ɪkˈsplɔːr/", pos: "動詞 (verb)", meaning: "探求する、調査する", example: "Some recent studies have explored how we interact with strangers.", exampleJp: "最近の研究のいくつかは、私たちが見知らぬ人とどう交流するかを調査した。" },
+    { word: "interact with", phonetic: "/ˌɪntərˈækt wɪð/", pos: "熟語 (phrase)", meaning: "〜と交流する、やりとりする", example: "Some studies have explored how we interact with strangers.", exampleJp: "いくつかの研究は私たちが見知らぬ人とどう交流するかを調査した。" },
+    { word: "subject", phonetic: "/ˈsʌbdʒɪkt/", pos: "名詞 (noun)", meaning: "被験者", example: "In one study, subjects were paired up with someone they had never met before.", exampleJp: "ある研究では、被験者たちは初対面の人とペアを組まされた。" },
+    { word: "pair up with", phonetic: "/per ʌp wɪð/", pos: "熟語 (phrase)", meaning: "〜とペアを組む", example: "Subjects were paired up with someone they had never met before.", exampleJp: "被験者たちは初対面の人とペアを組まされた。" },
+    { word: "come up with", phonetic: "/kʌm ʌp wɪð/", pos: "熟語 (phrase)", meaning: "〜を思いつく、考え出す", example: "Each pair was asked to come up with a light discussion topic.", exampleJp: "各ペアは軽い議論のテーマを思いつくよう求められた。" },
+    { word: "substantial", phonetic: "/səbˈstænʃəl/", pos: "形容詞 (adjective)", meaning: "中身のある、相当な", example: "A more substantial one, such as their personal goals.", exampleJp: "個人的な目標のような、より中身のあるもの。" },
+    { word: "casual conversation", phonetic: "/ˈkæʒuəl ˌkɑːnvərˈseɪʃən/", pos: "名詞句 (noun phrase)", meaning: "何気ない会話、気軽な会話", example: "Most subjects thought they would enjoy casual conversations more.", exampleJp: "ほとんどの被験者は、気軽な会話の方が楽しめると思っていた。" },
+    { word: "rate", phonetic: "/reɪt/", pos: "動詞 (verb)", meaning: "評価する、格付けする", example: "The subjects were asked to rate it based on enjoyment.", exampleJp: "被験者たちはそれを楽しさに基づいて評価するよう求められた。" },
+    { word: "based on", phonetic: "/beɪst ɑːn/", pos: "熟語 (phrase)", meaning: "〜に基づいて", example: "The subjects were asked to rate it based on enjoyment and feeling of connection.", exampleJp: "被験者たちは楽しさとつながりの感覚に基づいてそれを評価するよう求められた。" },
+    { word: "that is", phonetic: "/ðæt ɪz/", pos: "熟語 (phrase)", meaning: "つまり、すなわち", example: "That is, most subjects reported having a more positive experience.", exampleJp: "つまり、ほとんどの被験者がより肯定的な経験をしたと報告した。" },
+    { word: "overall", phonetic: "/ˌoʊvərˈɔːl/", pos: "副詞 (adverb)", meaning: "全体的に、概して", example: "Most subjects reported having a more positive experience overall.", exampleJp: "ほとんどの被験者が全体的により肯定的な経験をしたと報告した。" },
+    { word: "benefit from", phonetic: "/ˈbenɪfɪt frʌm/", pos: "熟語 (phrase)", meaning: "〜から恩恵を受ける、利益を得る", example: "People would benefit from interacting on a deeper level with strangers.", exampleJp: "人々は見知らぬ人とより深いレベルで交流することから恩恵を受けるだろう。" },
+    { word: "on a deeper level", phonetic: "/ɑːn ə ˈdiːpər ˈlevəl/", pos: "熟語 (phrase)", meaning: "より深いレベルで", example: "People would benefit from interacting on a deeper level with strangers.", exampleJp: "人々は見知らぬ人とより深いレベルで交流することから恩恵を受けるだろう。" },
+    { word: "desire to", phonetic: "/dɪˈzaɪər tuː/", pos: "熟語 (phrase)", meaning: "〜したいと望む", example: "The subjects generally expressed a desire to have meaningful conversations.", exampleJp: "被験者たちは概して、意味のある会話をしたいという願望を表した。" },
+    { word: "meaningful", phonetic: "/ˈmiːnɪŋfəl/", pos: "形容詞 (adjective)", meaning: "意味のある、有意義な", example: "A desire to have meaningful conversations with people.", exampleJp: "人々と意味のある会話をしたいという願望。" },
+    { word: "assumption", phonetic: "/əˈsʌmpʃən/", pos: "名詞 (noun)", meaning: "思い込み、前提、仮定", example: "The researchers believe that this assumption is incorrect.", exampleJp: "研究者たちは、この思い込みが間違っていると考えている。" },
+    { word: "for the most part", phonetic: "/fɔːr ðə moʊst pɑːrt/", pos: "熟語 (phrase)", meaning: "大部分は、たいていは", example: "For the most part, strangers are also interested in going beyond casual conversation.", exampleJp: "大部分において、見知らぬ人もまた気軽な会話を超えることに興味を持っている。" },
+    { word: "in exchange", phonetic: "/ɪn ɪksˈtʃeɪndʒ/", pos: "熟語 (phrase) ※選択肢", meaning: "引き換えに、見返りに", example: "He helped me with my work, and in exchange, I bought him lunch.", exampleJp: "彼は私の仕事を手伝ってくれたので、引き換えに私は彼に昼食をおごった。" },
+    { word: "for instance", phonetic: "/fɔːr ˈɪnstəns/", pos: "熟語 (phrase) ※選択肢", meaning: "例えば", example: "Many animals are in danger. The polar bear, for instance, is losing its habitat.", exampleJp: "多くの動物が危機に瀕している。例えば、ホッキョクグマは生息地を失いつつある。" },
+    { word: "in contrast", phonetic: "/ɪn ˈkɑːntræst/", pos: "熟語 (phrase) ※選択肢", meaning: "対照的に、それとは逆に", example: "My brother is very quiet. In contrast, my sister loves to talk.", exampleJp: "私の兄はとても静かだ。対照的に、私の姉は話すのが大好きだ。" },
+    { word: "in short", phonetic: "/ɪn ʃɔːrt/", pos: "熟語 (phrase) ※選択肢", meaning: "要するに、手短に言えば", example: "The plan was too expensive and too risky. In short, it was a bad idea.", exampleJp: "その計画は費用がかかりすぎ、危険すぎた。要するに、それは悪い考えだった。" }
+  ];
+
+  var cards = original.slice();
+  var currentIndex = 0;
+  var speed = 1.0;
+  var englishVoice = null;
+
+  function initVoices() {
+    if (typeof speechSynthesis === 'undefined') return;
+    var voices = speechSynthesis.getVoices();
+    if (!voices || voices.length === 0) return;
+    englishVoice = null;
+    for (var i = 0; i < voices.length; i++) {
+      if (voices[i].lang === 'en-US' && voices[i].name.indexOf('Google') !== -1) {
+        englishVoice = voices[i];
+        return;
+      }
+    }
+    for (var j = 0; j < voices.length; j++) {
+      if (voices[j].lang === 'en-US') { englishVoice = voices[j]; return; }
+    }
+    for (var k = 0; k < voices.length; k++) {
+      if (voices[k].lang === 'en-GB') { englishVoice = voices[k]; return; }
+    }
+    for (var l = 0; l < voices.length; l++) {
+      if (voices[l].lang && voices[l].lang.indexOf('en') === 0) { englishVoice = voices[l]; return; }
+    }
+  }
+
+  if (typeof speechSynthesis !== 'undefined') {
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = initVoices;
+    }
+    initVoices();
+  }
+
+  function renderCard() {
+    var c = cards[currentIndex];
+    document.getElementById('word').textContent = c.word;
+    document.getElementById('phonetic').textContent = c.phonetic;
+    document.getElementById('pos').textContent = c.pos;
+    document.getElementById('meaning').textContent = c.meaning;
+    document.getElementById('example').textContent = c.example;
+    document.getElementById('exampleJp').textContent = c.exampleJp;
+    document.getElementById('progress').textContent = (currentIndex + 1) + ' / ' + cards.length;
+    document.getElementById('progressFill').style.width = Math.round(((currentIndex + 1) / cards.length) * 100) + '%';
+    document.getElementById('card').classList.remove('back');
+    document.getElementById('prevBtn').disabled = currentIndex === 0;
+    document.getElementById('nextBtn').disabled = currentIndex === cards.length - 1;
+    updateWordList();
+  }
+
+  function flipCard() {
+    document.getElementById('card').classList.toggle('back');
+  }
+
+  function nextCard() {
+    if (currentIndex < cards.length - 1) {
+      currentIndex++;
+      renderCard();
+    }
+  }
+
+  function prevCard() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      renderCard();
+    }
+  }
+
+  function speak(text) {
+    if (typeof speechSynthesis === 'undefined') {
+      alert('お使いのブラウザは音声再生に対応していません');
+      return;
+    }
+    try {
+      speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'en-US';
+      u.rate = speed;
+      if (englishVoice) u.voice = englishVoice;
+      speechSynthesis.speak(u);
+    } catch (e) {
+      console.log('Speech error:', e);
+    }
+  }
+
+  function shuffle() {
+    for (var i = cards.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = cards[i];
+      cards[i] = cards[j];
+      cards[j] = tmp;
+    }
+    currentIndex = 0;
+    renderCard();
+  }
+
+  function resetCards() {
+    cards = original.slice();
+    currentIndex = 0;
+    renderCard();
+  }
+
+  function updateWordList() {
+    var list = document.getElementById('wordList');
+    var html = '';
+    for (var i = 0; i < cards.length; i++) {
+      html += '<div class="list-item' + (i === currentIndex ? ' current' : '') + '" data-index="' + i + '">';
+      html += '<span class="list-num">' + (i + 1) + '.</span>';
+      html += '<span class="list-word"></span>';
+      html += '<span class="list-meaning"></span>';
+      html += '</div>';
+    }
+    list.innerHTML = html;
+    var items = list.getElementsByClassName('list-item');
+    for (var k = 0; k < items.length; k++) {
+      items[k].getElementsByClassName('list-word')[0].textContent = cards[k].word;
+      items[k].getElementsByClassName('list-meaning')[0].textContent = cards[k].meaning;
+      (function(idx) {
+        items[idx].addEventListener('click', function() {
+          currentIndex = idx;
+          renderCard();
+        });
+      })(k);
+    }
+  }
+
+  document.getElementById('card').addEventListener('click', function(e) {
+    var target = e.target;
+    while (target && target !== this) {
+      if (target.classList && (target.classList.contains('controls') || target.tagName === 'BUTTON' || target.tagName === 'SELECT')) {
+        return;
+      }
+      target = target.parentNode;
+    }
+    flipCard();
+  });
+
+  document.getElementById('playWord').addEventListener('click', function(e) {
+    e.stopPropagation();
+    speak(cards[currentIndex].word);
+  });
+  document.getElementById('playExample').addEventListener('click', function(e) {
+    e.stopPropagation();
+    speak(cards[currentIndex].example);
+  });
+  document.getElementById('speedSelect').addEventListener('change', function() {
+    speed = parseFloat(this.value);
+  });
+  document.getElementById('speedSelect').addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+  document.getElementById('prevBtn').addEventListener('click', prevCard);
+  document.getElementById('nextBtn').addEventListener('click', nextCard);
+  document.getElementById('shuffleBtn').addEventListener('click', shuffle);
+  document.getElementById('resetBtn').addEventListener('click', resetCards);
+  document.getElementById('listToggle').addEventListener('click', function() {
+    document.getElementById('wordList').classList.toggle('show');
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight') nextCard();
+    else if (e.key === 'ArrowLeft') prevCard();
+    else if (e.key === ' ') { e.preventDefault(); flipCard(); }
+  });
+
+  renderCard();
+})();
+</script>
+</body>
+</html>
